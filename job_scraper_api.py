@@ -1,5 +1,4 @@
 import datetime
-import json
 from flask import Flask, request, jsonify
 from jobspy import scrape_jobs
 
