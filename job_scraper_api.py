@@ -51,7 +51,6 @@ def fetch_jobs():
     position = data.get("position")
     siteName = data.get("siteName")
 
-    # Validate input
     if not location or not position or not siteName:
         return jsonify({"error": "Missing required fields: location, position, siteName"}), 400
 
