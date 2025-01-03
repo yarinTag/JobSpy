@@ -1,6 +1,6 @@
 import datetime
 from flask import Flask, request, jsonify
-from jobspy import scrape_jobs
+from src.jobspy import scrape_jobs
 
 app = Flask(__name__)
 
