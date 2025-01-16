@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 VALID_SITES = ['indeed', 'linkedin', 'zip_recruiter', 'glassdoor', 'google']
 
-def scrape_jobs_map(location: str, position: str, siteName: str):
+def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
     try:
         if siteName not in VALID_SITES:
             raise ValueError(f"Invalid site name: {siteName}. Expected one of {VALID_SITES}.")
@@ -16,7 +16,7 @@ def scrape_jobs_map(location: str, position: str, siteName: str):
             google_search_term=f"{position} engineer jobs in {location} since past month",
             location=location,
             results_wanted=200,
-            hours_old=200,
+            hours_old=hourOld,
             linkedin_fetch_description=True,
             country_indeed='ISRAEL' if siteName == 'indeed' else 'USA',
         )
@@ -50,12 +50,14 @@ def fetch_jobs():
     location = data.get("location")
     position = data.get("position")
     siteName = data.get("siteName")
+    hourOld = data.get("hourOld")
+
 
     if not location or not position or not siteName:
         return jsonify({"error": "Missing required fields: location, position, siteName"}), 400
 
     try:
-        jobs_map = scrape_jobs_map(location, position, siteName)
+        jobs_map = scrape_jobs_map(location, position, siteName, hourOld)
         return jsonify(jobs_map)
     except ValueError as e:
         return jsonify({"error": str(e)}), 500
