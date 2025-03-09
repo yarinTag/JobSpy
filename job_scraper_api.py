@@ -1,5 +1,6 @@
+import random
+import requests
 import datetime
-from fp.fp import FreeProxy
 from flask import Flask, request, jsonify
 from src.jobspy import scrape_jobs
 
@@ -8,15 +9,32 @@ app = Flask(__name__)
 VALID_SITES = ['indeed', 'linkedin', 'zip_recruiter', 'glassdoor', 'google']
 
 def get_random_proxy():
-    """Fetches a fresh proxy from free-proxy."""
-    proxy = FreeProxy(timeout=1, rand=True).get()
-    return {"http": proxy, "https": proxy}
+    """Fetch a fresh proxy from Proxyscrape's API."""
+    url = "https://www.proxyscrape.com/api?request=getproxies&proxytype=http&timeout=10000&ssl=yes"
+    
+    try:
+        response = requests.get(url)
+        proxies = response.text.splitlines()
+
+        if proxies:
+            proxy = random.choice(proxies)
+            return {"http": f"http://{proxy}", "https": f"https://{proxy}"}
+        else:
+            return None
+    except requests.RequestException as e:
+        print(f"Error fetching proxies: {e}")
+        return None
 
 def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
     try:
         if siteName not in VALID_SITES:
             raise ValueError(f"Invalid site name: {siteName}. Expected one of {VALID_SITES}.")
+
         proxies = get_random_proxy()
+        if proxies:
+            print(f"Using proxy: {proxies}")
+        else:
+            print("No proxy available, continuing without proxy.")
 
         jobs = scrape_jobs(
             site_name=[siteName],
