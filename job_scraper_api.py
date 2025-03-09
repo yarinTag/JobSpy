@@ -23,7 +23,8 @@ def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
         )
         jobs = jobs.fillna(value='')
         # Convert jobs DataFrame to a dictionary with job URLs as keys
-        jobs_map = {job_url: data for job_url, data in jobs.to_dict(orient='index').items()}
+        jobs_map = jobs.set_index('job_url').to_dict(orient='index')
+        # jobs_map = {job_url: data for job_url, data in jobs.to_dict(orient='index').items()}
 
         # Serialize dates in the dictionary to ISO format
         for job_data in jobs_map.values():
