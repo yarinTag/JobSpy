@@ -1,4 +1,5 @@
 import datetime
+from fp.fp import FreeProxy
 from flask import Flask, request, jsonify
 from src.jobspy import scrape_jobs
 
@@ -6,13 +7,16 @@ app = Flask(__name__)
 
 VALID_SITES = ['indeed', 'linkedin', 'zip_recruiter', 'glassdoor', 'google']
 
+def get_random_proxy():
+    """Fetches a fresh proxy from free-proxy."""
+    proxy = FreeProxy(timeout=1, rand=True).get()
+    return {"http": proxy, "https": proxy}
+
 def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
     try:
         if siteName not in VALID_SITES:
             raise ValueError(f"Invalid site name: {siteName}. Expected one of {VALID_SITES}.")
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
-        }
+        proxies = get_random_proxy()
 
         jobs = scrape_jobs(
             site_name=[siteName],
@@ -23,7 +27,7 @@ def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
             hours_old=hourOld,
             linkedin_fetch_description=True,
             country_indeed='ISRAEL' if siteName == 'indeed' else 'USA',
-            headers= headers
+            proxies=proxies
         )
         jobs = jobs.fillna(value='')
         # Convert jobs DataFrame to a dictionary with job URLs as keys
