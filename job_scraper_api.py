@@ -1,5 +1,4 @@
 import datetime
-import random
 from flask import Flask, request, jsonify
 from src.jobspy import scrape_jobs
 
@@ -7,31 +6,10 @@ app = Flask(__name__)
 
 VALID_SITES = ['indeed', 'linkedin', 'zip_recruiter', 'glassdoor', 'google']
 
-proxy_list = [
-    "103.148.130.6:8080",
-    "128.140.113.110:8080",
-    "196.204.83.228:1976",
-    "207.244.254.27:7001",
-    "8.213.197.208:9080",
-    "103.102.141.39:4145",
-    "18.223.25.15:80",
-    "95.217.104.21:11308",
-    "134.122.26.44:46116"
-]
-
-def get_random_proxy():
-    """Randomly select a proxy from the list"""
-    proxy = random.choice(proxy_list)
-    return {"http": f"http://{proxy}", "https": f"https://{proxy}"}
-
 def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
     try:
         if siteName not in VALID_SITES:
             raise ValueError(f"Invalid site name: {siteName}. Expected one of {VALID_SITES}.")
-        proxies = get_random_proxy()
-        print(proxies)
-        if not proxies:
-            raise ValueError("No valid proxy available.")
 
         jobs = scrape_jobs(
             site_name=[siteName],
@@ -41,8 +19,7 @@ def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
             results_wanted=200,
             hours_old=hourOld,
             linkedin_fetch_description=True,
-            country_indeed='ISRAEL' if siteName == 'indeed' else 'USA',
-            proxies=proxies
+            country_indeed='ISRAEL' if siteName == 'indeed' else 'USA'
         )
         jobs = jobs.fillna(value='')
         # Convert jobs DataFrame to a dictionary with job URLs as keys
