@@ -10,6 +10,10 @@ def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
     try:
         if siteName not in VALID_SITES:
             raise ValueError(f"Invalid site name: {siteName}. Expected one of {VALID_SITES}.")
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36"
+        }
+
         jobs = scrape_jobs(
             site_name=[siteName],
             search_term=position,
@@ -19,6 +23,7 @@ def scrape_jobs_map(location: str, position: str, siteName: str, hourOld: int):
             hours_old=hourOld,
             linkedin_fetch_description=True,
             country_indeed='ISRAEL' if siteName == 'indeed' else 'USA',
+            headers= headers
         )
         jobs = jobs.fillna(value='')
         # Convert jobs DataFrame to a dictionary with job URLs as keys
